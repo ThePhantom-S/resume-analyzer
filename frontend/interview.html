@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerGPT | Neural Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #4f46e5;
+            --accent: #0891b2;
+            --border: rgba(0, 0, 0, 0.08);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --error: #ef4444;
+            --msg-ai: rgba(79, 70, 229, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg: #030712;
+            --surface: #0f172a;
+            --primary: #6366f1;
+            --accent: #06b6d4;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --msg-ai: rgba(99, 102, 241, 0.08);
+        }
+
+        * { box-sizing: border-box; transition: background 0.3s ease, color 0.3s ease; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .navbar {
+            height: 70px;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+        }
+
+        .interview-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .chat-display {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 16px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .ai-msg { background: var(--msg-ai); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .user-msg { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+        .input-container {
+            margin-top: 15px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .icon-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+        .typing { display: none; align-self: flex-start; gap: 5px; padding: 10px; }
+        .dot { width: 5px; height: 5px; background: var(--primary); border-radius: 50%; animation: bounce 1.4s infinite; }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
+    </style>
+</head>
+<body>
+    <div id="navbar-placeholder"></div>
+    <nav class="navbar">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:1.1rem;">NEURAL.<span style="color:var(--primary)">SIM</span></div>
+        </div>
+        <div id="roleTag" style="font-size:0.8rem; font-weight:700; color:var(--accent);">ROLE: LOADING...</div>
+        <button class="send-btn" style="background:var(--error);" onclick="location.href='dashboard.html'">QUIT</button>
+    </nav>
+
+    <div class="interview-wrapper">
+        <div class="chat-display" id="chatDisplay">
+            <div class="typing" id="typingIndicator">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Start typing to respond..." autocomplete="off">
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">SEND</button>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+    <script>
+        const chatDisplay = document.getElementById('chatDisplay');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const userInput = document.getElementById('userInput');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        const role = localStorage.getItem('currentRole') || "Developer";
+        const token = localStorage.getItem('idToken');
+        let history = [];
+
+        // 1. Initial State
+        window.onload = () => {
+            document.getElementById('roleTag').innerText = `ROLE: ${role.toUpperCase()}`;
+            appendMessage("Interviewer", `Neural link established. We are interviewing for the ${role} position. Ready?`, "ai-msg");
+            userInput.focus();
+        };
+
+        // 2. Global Key Listener: Automatically enters text in chatbox
+        document.addEventListener('keydown', (e) => {
+            // Ignore if user is already in the input or using functional keys (Ctrl, Alt, etc.)
+            if (document.activeElement !== userInput && !e.ctrlKey && !e.metaKey && e.key.length === 1) {
+                userInput.focus();
+            }
+        });
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            appendMessage("You", text, "user-msg");
+            userInput.value = "";
+            showTyping(true);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/mock-interview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ target_role: role, last_answer: text, history: history })
+                });
+                const data = await response.json();
+                showTyping(false);
+                appendMessage("Interviewer", data.question, "ai-msg");
+                history.push({ q: data.question, a: text });
+            } catch (err) {
+                showTyping(false);
+                appendMessage("System", "Neural link disrupted.", "ai-msg");
+            }
+        }
+
+        function appendMessage(sender, text, className) {
+            const div = document.createElement('div');
+            div.className = `msg ${className}`;
+            div.innerHTML = `<small style="display:block;margin-bottom:4px;opacity:0.6;font-weight:800">${sender}</small>${text}`;
+            chatDisplay.insertBefore(div, typingIndicator);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const target = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', target);
+            themeIcon.className = target === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        function showTyping(show) { typingIndicator.style.display = show ? 'flex' : 'none'; chatDisplay.scrollTop = chatDisplay.scrollHeight; }
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    </script>
+</body>
+</html>

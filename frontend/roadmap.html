@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+
+<html lang="en" data-theme="dark">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CareerGPT | Neural Roadmap</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+
+
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="calendar_sync.js"></script>
+
+
+
+    <style>
+
+        :root {
+
+            --bg: #030712;
+
+            --surface: rgba(17, 24, 39, 0.6);
+
+            --surface-solid: #0f172a;
+
+            --surface-hover: rgba(30, 41, 59, 0.8);
+
+            --border: rgba(255, 255, 255, 0.08);
+
+            --border-glow: rgba(99, 102, 241, 0.3);
+
+            --text-main: #f8fafc;
+
+            --text-muted: #94a3b8;
+
+            --text-dim: #64748b;
+
+            --primary: #6366f1;
+
+            --primary-light: #818cf8;
+
+            --success: #10b981;
+
+            --error: #ef4444;
+
+            --glow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
+
+            --glow-primary: 0 20px 40px -10px rgba(99, 102, 241, 0.4);
+
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+
+            --glass: rgba(255, 255, 255, 0.03);
+
+        }
+
+
+
+        [data-theme="light"] {
+
+            --bg: #f8fafc;
+
+            --surface: rgba(255, 255, 255, 0.7);
+
+            --surface-solid: #ffffff;
+
+            --border: rgba(99, 102, 241, 0.1);
+
+            --text-main: #1e293b;
+
+            --text-muted: #475569;
+
+            --primary: #4f46e5;
+
+            --glow: 0 20px 40px -15px rgba(99, 102, 241, 0.15);
+
+        }
+
+
+
+        * { box-sizing: border-box; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+       
+
+        body {
+
+            font-family: 'Plus Jakarta Sans', sans-serif;
+
+            background: var(--bg); color: var(--text-main);
+
+            min-height: 100vh; overflow-x: hidden;
+
+        }
+
+
+
+        /* Animated Background */
+
+        body::before {
+
+            content: ''; position: fixed; inset: 0;
+
+            background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+
+                        radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+
+            z-index: -1;
+
+        }
+
+
+
+        /* --- NAVBAR --- */
+
+        .navbar {
+
+            height: 80px; background: var(--surface); backdrop-filter: blur(40px);
+
+            border-bottom: 1px solid var(--border); display: flex;
+
+            align-items: center; justify-content: space-between;
+
+            padding: 0 50px; position: fixed; width: 100%; top: 0; z-index: 1000;
+
+        }
+
+        .nav-brand { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.5rem; letter-spacing: -1px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+
+
+
+        /* --- CYBER SIDEBAR --- */
+
+        /* --- SIDEBAR & MAIN VIEW --- */
+
+        .toggle-sidebar-btn { position: fixed; left: 30px; bottom: 30px; z-index: 1001; background: var(--text-main); color: var(--bg); border: none; width: 56px; height: 56px; border-radius: 20px; cursor: pointer; box-shadow: var(--glow); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+        .sidebar { width: 320px; background: var(--surface); backdrop-filter: blur(40px) saturate(180%); border-right: 1px solid var(--border); padding: 40px 25px; position: fixed; height: calc(100vh - 80px); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); z-index: 900; overflow-y: auto; top: 80px; }
+
+        .sidebar.collapsed { transform: translateX(-100%); }
+
+        .main-view { flex: 1; margin-left: 320px; padding: 50px; transition: margin-left 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .main-view.expanded { margin-left: 0; }
+
+
+
+        /* --- ORIGINAL RECENT LOG DESIGN --- */
+
+        .history-node { background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 24px; padding: 20px; margin-bottom: 15px; cursor: pointer; }
+
+        .history-node:hover { border-color: var(--primary); background: var(--surface); transform: scale(0.98); }
+
+        .history-node .role-title { font-weight: 700; font-size: 0.95rem; display: block; margin-bottom: 8px; }
+
+
+
+        /* --- MAIN VIEW --- */
+
+        .main-view { flex: 1; margin-left: 320px; padding: 50px 60px; display: grid; grid-template-columns: 1fr 400px; gap: 50px; margin-top: 80px; }
+
+
+
+        .roadmap-header { margin-bottom: 45px; }
+
+        .roadmap-title { font-size: 3rem; font-weight: 800; letter-spacing: -2px; margin: 0; line-height: 1; }
+
+        .roadmap-subtitle { display: inline-flex; align-items: center; gap: 10px; margin-top: 15px; padding: 10px 20px; background: rgba(99, 102, 241, 0.1); border-radius: 30px; font-size: 0.95rem; font-weight: 700; color: var(--primary-light); }
+
+
+
+        /* --- PATHWAY SEQUENCE --- */
+
+        .roadmap-grid { display: flex; flex-direction: column; position: relative; }
+
+        .roadmap-grid::before {
+
+            content: ''; position: absolute; left: 35px; top: 50px; bottom: 50px;
+
+            width: 2px; background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 50%, transparent 100%);
+
+            opacity: 0.3; z-index: 0;
+
+        }
+
+
+
+        .roadmap-node {
+
+            background: var(--surface); border: 1px solid var(--border); border-radius: 28px;
+
+            padding: 30px; display: flex; gap: 25px; backdrop-filter: blur(20px);
+
+            margin-bottom: 25px; position: relative; z-index: 1; box-shadow: var(--glow);
+
+        }
+
+        .roadmap-node:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: var(--glow-primary); }
+
+        .roadmap-node.completed { border-color: var(--success); background: rgba(16, 185, 129, 0.05); }
+
+
+
+        .node-index {
+
+            min-width: 70px; height: 70px; background: var(--surface-solid); border: 2px solid var(--border);
+
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+
+            font-family: 'Space Grotesk'; font-size: 1.5rem; font-weight: 700; color: var(--primary);
+
+        }
+
+        .roadmap-node.completed .node-index { background: var(--success); border-color: transparent; color: white; }
+
+
+
+        .node-title { font-weight: 800; font-size: 1.2rem; color: var(--text-main); margin-bottom: 10px; display: block; }
+
+        .node-description { color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 25px; }
+
+
+
+        /* --- ACTION BUTTONS --- */
+
+        .node-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .action-btn {
+
+            padding: 12px 20px; border-radius: 14px; font-size: 0.85rem; font-weight: 700;
+
+            text-decoration: none; border: 1px solid var(--border); background: var(--glass);
+
+            color: var(--text-main); display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+
+        }
+
+        .action-btn:hover { background: var(--text-main); color: var(--bg); transform: translateY(-3px); }
+
+       
+
+        .vid-btn { color: #f87171; border-color: rgba(248, 113, 113, 0.2); }
+
+        .doc-btn { color: #38bdf8; border-color: rgba(56, 189, 248, 0.2); }
+
+        .mentor-btn { color: var(--primary-light); border-color: rgba(129, 140, 248, 0.2); }
+
+
+
+        .complete-checkbox { appearance: none; width: 28px; height: 28px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; position: relative; }
+
+        .complete-checkbox:checked { background: var(--success); border-color: transparent; }
+
+        .complete-checkbox:checked::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; }
+
+
+
+        /* --- STATUS PANEL --- */
+
+        .status-container { position: sticky; top: 110px; display: flex; flex-direction: column; gap: 25px; }
+
+        .panel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 30px; padding: 35px; text-align: center; box-shadow: var(--glow); backdrop-filter: blur(20px); }
+
+        .perc-val { font-family: 'Space Grotesk'; font-size: 4rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
+
+        .mini-progress-bg { width: 100%; height: 10px; background: var(--bg); border-radius: 10px; overflow: hidden; margin-top: 15px; border: 1px solid var(--border); }
+
+        .mini-progress-fill { height: 100%; background: var(--gradient-primary); transition: width 1s; }
+
+
+
+        /* --- MODAL --- */
+
+        .modal-blur { position: fixed; inset: 0; background: rgba(3, 7, 18, 0.9); backdrop-filter: blur(20px); display: none; z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+
+        .modal-blur.active { display: flex; }
+
+        .modal-content { background: var(--surface-solid); border: 1px solid var(--border); border-radius: 35px; padding: 45px; max-width: 650px; width: 100%; position: relative; box-shadow: var(--glow); }
+
+        .modal-body-glass { background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 30px; margin: 25px 0; }
+
+        #modalText { line-height: 1.8; color: var(--text-muted); font-size: 1.05rem; white-space: pre-wrap; }
+
+
+
+        .delete-record-btn { background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+
+        .hidden { display: none !important; }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <div id="navbar-placeholder"></div>
+
+
+
+    <div class="app-wrapper">
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 25px;">Mission Vault</div>
+                <div id="historyList"></div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-calendar-check" style="color: var(--primary);"></i> Time Management
+                </div>
+                <button class="action-btn" style="width:100%; background: var(--gradient-primary); color:white; border:none; padding:14px; border-radius:12px; font-size: 0.85rem;" onclick="handleCalendarAuth()">
+                    <i class="fab fa-google" style="margin-right: 8px;"></i> Sync to Calendar
+                </button>
+            </div>
+        </aside>
+
+        <button class="toggle-sidebar-btn" onclick="toggleSidebar()" data-tooltip="Toggle History Vault">
+            <i class="fas fa-history"></i>
+        </button>
+
+
+
+        <main class="main-view">
+
+            <div class="roadmap-grid">
+
+                <div class="roadmap-header">
+
+                    <h1 id="plannerTitle" class="roadmap-title">Mastery Sequence</h1>
+
+                    <p id="currentRoleDisplay" class="roadmap-subtitle">Initializing Vector...</p>
+
+                </div>
+
+                <div id="roadmapBody"></div>
+
+            </div>
+
+
+
+            <aside>
+
+                <div class="status-container">
+
+                    <div class="panel-card">
+
+                        <div class="perc-val" id="percText">0%</div>
+
+                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px;">Global Mastery</div>
+
+                        <div style="display:flex; justify-content: space-between; font-weight: 800; font-size: 0.85rem; margin-top: 30px;">
+
+                            <span>Milestones</span><span id="statDone">0/30</span>
+
+                        </div>
+
+                        <div class="mini-progress-bg"><div id="statBar" class="mini-progress-fill" style="width: 0%"></div></div>
+
+                    </div>
+
+
+
+                    <div class="panel-card">
+
+                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 25px;">Competency Radar</div>
+
+                        <div style="height: 280px;"><canvas id="roadmapRadar"></canvas></div>
+
+                        <button class="action-btn" style="width:100%; margin-top: 25px; background:var(--primary); color:white; border:none; padding:16px; border-radius:16px;" onclick="window.location.href='dashboard.html'">Return to Command HQ</button>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </main>
+
+    </div>
+
+
+
+    <div class="modal-blur" id="modalOverlay">
+
+        <div class="modal-content">
+
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+
+                <h2 id="modalTopic" style="font-family:'Space Grotesk'; font-size:1.6rem; font-weight:700;">AI Mentor</h2>
+
+                <button onclick="closeModal()" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+
+            </div>
+
+            <div class="modal-body-glass"><div id="modalText">Synthesizing...</div></div>
+
+            <button class="action-btn" style="width:100%; margin-top: 20px; background:var(--primary); color:white; border:none;" onclick="closeModal()">Acknowledge</button>
+
+        </div>
+
+    </div>
+
+
+
+     <footer class="footer" style="background: var(--card-bg, #ffffff); border-top: 1px solid var(--border-color, #e2e8f0); padding: 60px 20px 30px 20px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-main, #1e293b); margin-top: 40px;">
+        <div class="footer-grid" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+            
+            <div class="footer-brand">
+                <a href="#" class="logo" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 800; color: #6366f1; text-decoration: none; margin-bottom: 20px;">
+                    <i class="fa-solid fa-layer-group"></i> NEURALGPT
+                </a>
+                <p class="footer-desc" style="font-size: 0.9rem; line-height: 1.6; color: #64748b; margin-bottom: 25px;">
+                    AI-powered career intelligence to validate skills, plan roadmaps, and track mastery for the next generation of developers.
+                </p>
+                <div class="social-links" style="display: flex; gap: 15px;">
+                    <a href="#" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #6366f1; border-radius: 8px; text-decoration: none; transition: 0.3s;"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #6366f1; border-radius: 8px; text-decoration: none; transition: 0.3s;"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="#" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #6366f1; border-radius: 8px; text-decoration: none; transition: 0.3s;"><i class="fa-brands fa-discord"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-col" style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #1e293b;">Neural Interface</h4>
+                <a href="dashboard.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem; transition: 0.2s;">Career Dashboard</a>
+                <a href="roadmap.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem; transition: 0.2s;">Growth Roadmap</a>
+                <a href="interview.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem; transition: 0.2s;">Neural Simulation</a>
+            </div>
+            
+            <div class="footer-col" style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #1e293b;">System Architecture</h4>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Gemini 2.5 Flash
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-database" style="color: #3b82f6;"></i> Supabase DB
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-brands fa-python" style="color: #2dd4bf;"></i> FastAPI Core
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-shield-halved" style="color: #6366f1;"></i> Firebase Auth
+                </div>
+                
+            </div>
+            
+            <div class="footer-col" style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #1e293b;">Resources</h4>
+
+                <a href="#" style="text-decoration: none; color: #64748b; font-size: 0.9rem;">GitHub Repository</a>
+                <a href="#" style="text-decoration: none; color: #64748b; font-size: 0.9rem;">Release Notes</a>
+                <a href="team.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem;">Developer Team</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom" style="max-width: 1200px; margin: 40px auto 0 auto; padding-top: 25px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; font-size: 0.85rem; color: #94a3b8;">
+            <div>© 2025 CareerGPT. Intelligence for the Future of Work.</div>
+            <div style="display:flex; gap:25px;">
+                <a href="#" style="text-decoration:none; color:inherit; transition: 0.2s;">Privacy Policy</a>
+                <a href="#" style="text-decoration:none; color:inherit; transition: 0.2s;">Terms of Service</a>
+                <a href="#" style="text-decoration:none; color:inherit; transition: 0.2s;">Neural Safety</a>
+            </div>
+        </div>
+    </footer>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+
+<script>
+
+
+
+    const API_KEY = 'AIzaSyB03Uzl48u5_r8f6a-atS85Qbpxshi5d1E';
+
+    let total = 0, done = 0, roadmapChart = null, tokenClient;
+
+
+
+    /**
+
+     * GOOGLE CALENDAR AUTH & SYNC ENGINE
+
+     */
+
+    async function handleCalendarAuth() {
+
+        try {
+
+            if (typeof google === 'undefined' || typeof gapi === 'undefined') {
+
+                throw new Error("Google APIs are still initializing. Please wait 5 seconds.");
+
+            }
+
+
+
+            if (!tokenClient) {
+
+                tokenClient = google.accounts.oauth2.initTokenClient({
+
+                    // PASTE YOUR CLIENT ID BELOW (Look for 'Web client 1' in your dashboard)
+
+                    client_id: '1019398275120-rikb69tnphvvq27iom825fqe9cm7cb8t.apps.googleusercontent.com',
+
+                    scope: 'https://www.googleapis.com/auth/calendar.events',
+
+                    callback: (response) => {
+
+                        if (response.error !== undefined) throw response;
+
+                        initiateCalendarSync();
+
+                    },
+
+                });
+
+            }
+
+            tokenClient.requestAccessToken({prompt: 'consent'});
+
+        } catch (err) { alert("Sync Failure: " + err.message); }
+
+    }
+
+
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-view'); // Target by class
+        const footer = document.querySelector('.footer');
+        
+        if(sidebar && mainContent) {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            if(footer) footer.classList.toggle('expanded');
+        }
+    }
+
+
+
+    async function initiateCalendarSync() {
+
+        const rawData = localStorage.getItem('currentRoadmap');
+
+        const plan = JSON.parse(rawData)["30"] || [];
+
+        const startDate = new Date();
+
+        startDate.setHours(9, 0, 0, 0);
+
+
+
+        alert(`Commencing Mission Sync: ${plan.length} daily vectors scheduled.`);
+
+       
+
+        plan.forEach((item, i) => {
+
+            const eventDate = new Date(startDate);
+
+            eventDate.setDate(startDate.getDate() + i);
+
+            console.log(`Vector Scheduled: Day ${i+1} - ${item.topic} for ${eventDate.toDateString()}`);
+
+        });
+
+
+
+        alert("Mission Synchronized. Verify events in your Google Calendar console.");
+
+    }
+
+
+
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        const savedTheme = localStorage.getItem('career_theme') || 'light';
+
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+
+
+        const rawData = localStorage.getItem('currentRoadmap');
+
+        const analysisId = localStorage.getItem('currentAnalysisId');
+
+        const role = localStorage.getItem('currentRole');
+
+
+
+        if (!rawData || !analysisId) {
+
+            window.location.href = 'dashboard.html';
+
+            return;
+
+        }
+
+
+
+        if (role) document.getElementById('currentRoleDisplay').innerText = role;
+
+
+
+        initRadarChart([0,0,0,0,0]);
+
+        const plan = JSON.parse(rawData)["30"] || [];
+
+        total = plan.length;
+
+        const progressMap = await fetchSavedProgress(analysisId);
+
+
+
+        document.getElementById('roadmapBody').innerHTML = plan.map((item, index) => {
+            // Ensure dayId is always a clean number based on its position in the 30-item array
+            // This fixes the 1, 10, 11... sorting issue or missing numbers
+            const displayNum = index + 1; 
+            const dayLabel = item.day || `${displayNum}`;
+            
+            const isDone = progressMap[dayLabel] || false;
+            if (isDone) done++;
+
+            const videoUrl = (item.video && item.video.startsWith('http')) 
+                ? item.video 
+                : `https://www.youtube.com/results?search_query=${encodeURIComponent(item.topic + ' tutorial')}`;
+
+            return `
+                <div class="roadmap-node ${isDone ? 'completed' : ''}" id="node-${displayNum}">
+                    <div class="node-index">${displayNum}</div>
+                    <div style="flex:1;">
+                        <div class="node-title-row">
+                            <span class="node-title">${item.topic}</span>
+                            <input type="checkbox" class="complete-checkbox" ${isDone ? 'checked' : ''} 
+                                onchange="toggleNode('${dayLabel}', this, '${displayNum}')">
+                        </div>
+                        <div class="node-description">${item.description}</div>
+                        <div class="node-actions">
+                            <a href="${videoUrl}" target="_blank" class="action-btn vid-btn"><i class="fab fa-youtube"></i> Video</a>
+                            <a href="${item.docs}" target="_blank" class="action-btn doc-btn"><i class="fas fa-book"></i> Docs</a>
+                            <button class="action-btn mentor-btn" onclick="explainTask('${item.topic}', '${item.description}')">
+                                <i class="fas fa-brain"></i> AI Mentor
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        updateUI();
+
+        syncRadar(analysisId);
+
+        loadHistory();
+
+    });
+
+
+
+    function initRadarChart(dataValues) {
+
+        const ctx = document.getElementById('roadmapRadar').getContext('2d');
+
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        if (roadmapChart) roadmapChart.destroy();
+
+        roadmapChart = new Chart(ctx, {
+
+            type: 'radar',
+
+            data: {
+
+                labels: ["Foundations", "Tooling", "Architecture", "Projects", "Interviews"],
+
+                datasets: [{ label: 'Competency', data: dataValues, backgroundColor: 'rgba(99, 102, 241, 0.15)', borderColor: '#6366f1', borderWidth: 2, pointBackgroundColor: '#6366f1', pointRadius: 4 }]
+
+            },
+
+            options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 35, ticks: { display: false }, grid: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }, angleLines: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }, pointLabels: { color: isDark ? '#94a3b8' : '#475569', font: { family: 'Plus Jakarta Sans', size: 10, weight: '700' } } } }, plugins: { legend: { display: false } } }
+
+        });
+
+    }
+
+
+
+    async function syncRadar(analysisId) {
+
+        const token = localStorage.getItem("idToken");
+
+        try {
+
+            const res = await fetch(`http://127.0.0.1:8000/get-progress/${analysisId}`, { headers: { 'Authorization': 'Bearer ' + token } });
+
+            const progressData = await res.json();
+
+            const dataValues = [0, 0, 0, 0, 0];
+
+            progressData.forEach(p => {
+
+                if (!p.is_completed) return;
+
+                const dayNum = parseInt(p.day_label.replace(/\D/g, "")) || 0;
+
+                const score = p.skill_score || 5;
+
+                if (dayNum <= 6) dataValues[0] += score; else if (dayNum <= 12) dataValues[1] += score; else if (dayNum <= 18) dataValues[2] += score; else if (dayNum <= 24) dataValues[3] += score; else dataValues[4] += score;
+
+            });
+
+            roadmapChart.data.datasets[0].data = dataValues;
+
+            roadmapChart.update();
+
+        } catch (e) { console.error(e); }
+
+    }
+
+
+
+    async function fetchSavedProgress(id) {
+
+        const token = localStorage.getItem("idToken");
+
+        try {
+
+            const res = await fetch(`http://127.0.0.1:8000/get-progress/${id}`, { headers: { 'Authorization': 'Bearer ' + token } });
+
+            const data = await res.json();
+
+            const map = {};
+
+            data.forEach(p => map[p.day_label] = p.is_completed);
+
+            return map;
+
+        } catch (e) { return {}; }
+
+    }
+
+
+
+    async function toggleNode(dayLabel, checkbox, dayId) {
+
+        const isChecked = checkbox.checked;
+
+        const node = document.getElementById(`node-${dayId}`);
+
+        isChecked ? (node.classList.add('completed'), done++) : (node.classList.remove('completed'), done--);
+
+        updateUI();
+
+        const token = localStorage.getItem("idToken");
+
+        const analysisId = localStorage.getItem('currentAnalysisId');
+
+        try {
+
+            const response = await fetch('http://127.0.0.1:8000/update-progress', {
+
+                method: 'POST',
+
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+
+                body: JSON.stringify({ analysis_id: analysisId, day_label: dayLabel, is_completed: isChecked, skill_score: isChecked ? 5 : 0, duration_type: "30" })
+
+            });
+
+            if (!response.ok) throw new Error("Cloud sync failed");
+
+            syncRadar(analysisId);
+
+        } catch (e) {
+
+            checkbox.checked = !isChecked;
+
+            isChecked ? (node.classList.remove('completed'), done--) : (node.classList.add('completed'), done++);
+
+            updateUI();
+
+            alert("Connection lost. Progress could not be saved.");
+
+        }
+
+    }
+
+
+
+    function updateUI() {
+
+        const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        document.getElementById('percText').innerText = percent + "%";
+
+        document.getElementById('statDone').innerText = `${done}/${total}`;
+
+        document.getElementById('statBar').style.width = percent + "%";
+
+    }
+
+
+
+    async function explainTask(topic, desc) {
+
+        const m = document.getElementById('modalOverlay');
+
+        const textEl = document.getElementById('modalText');
+
+        document.getElementById('modalTopic').innerText = topic;
+
+        textEl.innerText = "SYNCHRONIZING_NEURAL_MENTOR...";
+
+        m.classList.add('active');
+
+        try {
+
+            const token = localStorage.getItem("idToken");
+
+            const res = await fetch('http://127.0.0.1:8000/explain-task', {
+
+                method: 'POST',
+
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+
+                body: JSON.stringify({ topic: topic, description: desc })
+
+            });
+
+            if (!res.ok) throw new Error("Offline");
+
+            const data = await res.json();
+
+            textEl.innerText = data.explanation || "No explanation returned.";
+
+        } catch (e) { textEl.innerText = "Link Failure: System could not reach AI Mentor."; }
+
+    }
+
+
+
+    function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+
+
+    function toggleTheme() {
+
+        const html = document.documentElement;
+
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+
+        html.setAttribute('data-theme', next);
+
+        localStorage.setItem('career_theme', next);
+
+        document.getElementById('themeIcon').innerText = next === 'dark' ? '🌙' : '☀️';
+
+        syncRadar(localStorage.getItem('currentAnalysisId'));
+
+    }
+
+</script>
+
+</body>
+
+</html>
+

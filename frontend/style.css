@@ -1,0 +1,53 @@
+body {
+    padding-top: 85px; /* Adjusts for the navbar height */
+    margin: 0;
+    background-color: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Ensure content scales on small screens */
+@media (max-width: 600px) {
+    body { padding-top: 120px; } /* More space if navbar wraps on mobile */
+}
+
+.card {
+  width: 700px;
+  background: #020617;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+}
+
+textarea, input {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #020617;
+  color: white;
+}
+
+button {
+  margin-top: 16px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg,#6366f1,#22d3ee);
+  border: none;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.hidden { display: none; }
+
+.result-card {
+  margin-top: 20px;
+  background: #020617;
+  padding: 16px;
+  border-radius: 12px;
+}
+

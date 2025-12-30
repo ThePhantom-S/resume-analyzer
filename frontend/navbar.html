@@ -1,0 +1,78 @@
+<nav class="glass-nav" style="
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 1200px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    z-index: 10000;
+    border-radius: 20px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+">
+    <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--text-main);">
+        NEURAL<span style="color: var(--primary);">GPT</span>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="roadmap.html" class="nav-link">Roadmap</a>
+        <a href="team.html" class="nav-link">Team</a>
+    </div>
+
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <button onclick="toggleTheme()" class="theme-btn" id="themeIconGlobal">🌙</button>
+        <button onclick="logout()" class="exit-btn">EXIT</button>
+    </div>
+</nav>
+
+<style>
+    /* Dual Theme Variables */
+    :root {
+        --nav-bg: rgba(255, 255, 255, 0.6);
+        --glass-border: rgba(255, 255, 255, 0.4);
+        --text-main: #0f172a;
+        --primary: #6366f1;
+        --nav-link-hover: rgba(99, 102, 241, 0.1);
+    }
+
+    [data-theme="dark"] {
+        --nav-bg: rgba(15, 23, 42, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --text-main: #f8fafc;
+        --nav-link-hover: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-link {
+        text-decoration: none;
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        border-radius: 12px;
+        transition: 0.2s;
+    }
+
+    .nav-link:hover { background: var(--nav-link-hover); }
+
+    .theme-btn {
+        background: none; border: 1px solid var(--glass-border);
+        color: var(--text-main); width: 38px; height: 38px;
+        border-radius: 12px; cursor: pointer; display: flex;
+        align-items: center; justify-content: center;
+    }
+
+    .exit-btn {
+        background: var(--text-main); color: var(--nav-bg);
+        border: none; padding: 8px 18px; border-radius: 12px;
+        font-weight: 700; font-size: 0.75rem; cursor: pointer;
+    }
+</style>

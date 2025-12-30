@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Intelligence | NEURALGPT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-body: #F8FAFC;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-card: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary: #6366f1;
+            --primary-hover: #4F46E5;
+            --border: #E2E8F0;
+            --icon-bg: #EEF2FF;
+            --blob-color-1: #E0E7FF;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0B1120;
+            --bg-glass: rgba(15, 23, 42, 0.85);
+            --bg-card: #1E293B;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --primary: #818CF8;
+            --primary-hover: #A5B4FC;
+            --border: #334155;
+            --icon-bg: #1e1b4b;
+            --blob-color-1: #1E1B4B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex; flex-direction: column; min-height: 100vh;
+            transition: 0.3s ease;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.8rem 0;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo {
+            font-size: 1.3rem; font-weight: 800; color: var(--primary);
+            text-decoration: none; display: flex; align-items: center; gap: 10px;
+        }
+        .nav-home {
+            text-decoration: none; color: var(--text-main); font-weight: 700; font-size: 0.85rem;
+            padding: 8px 16px; border: 1px solid var(--border); border-radius: 10px;
+            background: var(--bg-card); transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .nav-home:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Hero */
+        .header-section { text-align: center; padding: 100px 24px 60px; position: relative; }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6;
+            width: 400px; height: 400px; background: var(--blob-color-1); top: -100px; left: 50%; transform: translateX(-50%);
+        }
+        h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* Team Grid */
+        .container { max-width: 1000px; margin: 0 auto 80px; padding: 0 24px; flex: 1; }
+        .team-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); /* Forced 2 Columns */
+            gap: 40px; margin-top: 40px;
+        }
+
+        .member-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px;
+            padding: 40px; text-align: center; box-shadow: var(--shadow-sm);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .member-card:hover { transform: translateY(-12px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
+
+        .avatar-box {
+            width: 140px; height: 140px; margin: 0 auto 24px; border-radius: 30px;
+            overflow: hidden; border: 4px solid var(--bg-body); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .member-name { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+        .member-role { 
+            font-size: 0.8rem; font-weight: 700; color: var(--primary); 
+            text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;
+            display: inline-block; padding: 4px 12px; background: var(--icon-bg); border-radius: 20px;
+        }
+
+        /* Mission */
+        .mission-box {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-body) 100%);
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 50px; margin-top: 60px; text-align: center;
+        }
+        .mission-box h2 { font-size: 2rem; font-weight: 800; margin-bottom: 20px; }
+        .mission-box p { color: var(--text-muted); font-size: 1.1rem; max-width: 800px; margin: 0 auto; }
+
+        .social-link {
+            width: 40px; height: 40px; border-radius: 12px; background: var(--bg-body);
+            color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center;
+            text-decoration: none; transition: 0.2s; margin: 0 5px;
+        }
+        .social-link:hover { background: var(--primary); color: white; transform: scale(1.1); }
+
+        footer {
+            padding: 30px 24px; border-top: 1px solid var(--border); text-align: center;
+            font-size: 0.9rem; color: var(--text-muted); background: var(--bg-card);
+        }
+
+        @media (max-width: 768px) {
+            .team-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="dashboard.html" class="logo">
+                <i class="fa-solid fa-layer-group"></i> NEURALGPT
+            </a>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <button class="nav-home" id="themeToggle" style="padding: 8px 12px;"><i class="fa-solid fa-moon"></i></button>
+                <a href="dashboard.html" class="nav-home"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="header-section">
+        <div class="blob"></div>
+        <h1>The <span class="text-gradient">Core Architects</span></h1>
+        <p>The engineering minds behind NEURALGPT, bridging the gap between raw skills and professional mastery.</p>
+    </div>
+
+    <div class="container">
+        <div class="team-grid">
+            <div class="member-card">
+                <div class="avatar-box">
+                    <img src="pic/Hari.jpeg" alt="R HARI KRISHNAN" class="avatar-img" onerror="this.src='https://ui-avatars.com/api/?name=Hari+Krishnan&background=6366f1&color=fff'">
+                </div>
+                <h3 class="member-name">R HARI KRISHNAN</h3>
+                <div class="member-role">Team Lead</div>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">
+                    Specializes in backend architecture and AI integration. Dedicated to building the logic that powers NEURALGPT's roadmap generation.
+                </p>
+                <div class="social-links">
+                    <a href=https://www.linkedin.com/in/hari-krishnan-r-1a83582b6/ target="_blank" class="social-link"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://github.com/ThePhantom-S" target="_blank" class="social-link"><i class="fa-brands fa-github"></i></a>
+                    <a href="mailto:rharikrishnan8726@gmail.com" class="social-link"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <div class="avatar-box">
+                    <img src="pic/JJ.jpeg" alt="JOHN JERISHTON V" class="avatar-img" onerror="this.src='https://ui-avatars.com/api/?name=John+Jerishton&background=6366f1&color=fff'">
+                </div>
+                <h3 class="member-name">JOHN JERISHTON V</h3>
+                <div class="member-role">Member</div>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">
+                    Focused on crafting seamless user experiences and intuitive interfaces. Designing the visual language of the future of career tracking.
+                </p>
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/john-jerishton-v-2aabba364" target="_blank" class="social-link"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://github.com/johnjerishton-arch" target="_blank" class="social-link"><i class="fa-brands fa-github"></i></a>
+                    <a href="mailto:johnjerishton@gmail.com" class="social-link"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="mission-box">
+            <h2>The Mission</h2>
+            <p>
+                Navigating a career in technology shouldn't feel like guesswork. We built CareerGPT to transform raw data into actionable intelligence. By automating skill gap analysis and roadmap planning, we empower developers to spend less time wondering "what next" and more time building what matters.
+            </p>
+        </div>
+    </div>
+
+    <footer class="footer" style="background: var(--card-bg, #ffffff); border-top: 1px solid var(--border-color, #e2e8f0); padding: 60px 20px 30px 20px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-main, #1e293b); margin-top: 40px;">
+        <div class="footer-grid" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+            
+            <div class="footer-brand">
+                <a href="#" class="logo" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 800; color: #6366f1; text-decoration: none; margin-bottom: 20px;">
+                    <i class="fa-solid fa-layer-group"></i> NEURALGPT
+                </a>
+                <p class="footer-desc" style="font-size: 0.9rem; line-height: 1.6; color: #64748b; margin-bottom: 25px;">
+                    AI-powered career intelligence to validate skills, plan roadmaps, and track mastery for the next generation of developers.
+                </p>
+                <div class="social-links" style="display: flex; gap: 15px;">
+                    <a href="#" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #6366f1; border-radius: 8px; text-decoration: none; transition: 0.3s;"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #6366f1; border-radius: 8px; text-decoration: none; transition: 0.3s;"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="#" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #6366f1; border-radius: 8px; text-decoration: none; transition: 0.3s;"><i class="fa-brands fa-discord"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-col" style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #1e293b;">Neural Interface</h4>
+                <a href="dashboard.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem; transition: 0.2s;">Career Dashboard</a>
+                <a href="roadmap.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem; transition: 0.2s;">Growth Roadmap</a>
+                <a href="interview.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem; transition: 0.2s;">Neural Simulation</a>
+            </div>
+            
+            <div class="footer-col" style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #1e293b;">System Architecture</h4>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Gemini 2.5 Flash
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-database" style="color: #3b82f6;"></i> Supabase DB
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-brands fa-python" style="color: #2dd4bf;"></i> FastAPI Core
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-shield-halved" style="color: #6366f1;"></i> Firebase Auth
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-shield-halved" style="color: #6366f1;"></i> Firebase Auth
+                </div>
+            </div>
+            
+            <div class="footer-col" style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #1e293b;">Resources</h4>
+                <a href="#" style="text-decoration: none; color: #64748b; font-size: 0.9rem;">Documentation</a>
+                <a href="#" style="text-decoration: none; color: #64748b; font-size: 0.9rem;">GitHub Repository</a>
+                <a href="#" style="text-decoration: none; color: #64748b; font-size: 0.9rem;">Release Notes</a>
+                <a href="team.html" style="text-decoration: none; color: #64748b; font-size: 0.9rem;">Developer Team</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom" style="max-width: 1200px; margin: 40px auto 0 auto; padding-top: 25px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; font-size: 0.85rem; color: #94a3b8;">
+            <div>© 2025 NEURALGPT. Intelligence for the Future of Work.</div>
+            <div style="display:flex; gap:25px;">
+                <a href="#" style="text-decoration:none; color:inherit; transition: 0.2s;">Privacy Policy</a>
+                <a href="#" style="text-decoration:none; color:inherit; transition: 0.2s;">Terms of Service</a>
+                <a href="#" style="text-decoration:none; color:inherit; transition: 0.2s;">Neural Safety</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        const themeBtn = document.getElementById('themeToggle');
+        const icon = themeBtn.querySelector('i');
+        const html = document.documentElement;
+        
+        const savedTheme = localStorage.getItem('career_theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('career_theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+    </script>
+</body>
+</html>
